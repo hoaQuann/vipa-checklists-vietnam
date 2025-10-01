@@ -1,6 +1,6 @@
 "use client";
 import { useEffect } from 'react';
-import Chart from 'chart.js/auto';
+import Chart, { type TooltipItem } from 'chart.js/auto';
 
 // Định nghĩa kiểu dữ liệu cho props mà component này nhận vào
 interface LandingPageProps {
@@ -37,7 +37,8 @@ const WeightingChart = () => {
           legend: { display: false },
           tooltip: {
             callbacks: {
-              label: (context) => `${context.label}: ${context.parsed}%`
+              // Sửa lỗi type 'any'
+              label: (context: TooltipItem<'doughnut'>) => `${context.label}: ${context.parsed}%`
             }
           }
         },
@@ -108,35 +109,35 @@ export default function LandingPage({ onStart }: LandingPageProps) {
       <section className="mb-20">
         <h2 className="text-3xl font-bold text-center mb-12">5 Cấp độ Sẵn sàng của Doanh nghiệp</h2>
         <div className="relative max-w-4xl mx-auto border-l-4 border-blue-200">
-            <div className="step-item relative pl-16 pb-12">
+            <div className="relative pl-16 pb-12">
                 <div className="absolute left-[-26px] top-0 flex items-center justify-center w-12 h-12 bg-white border-4 border-blue-200 rounded-full"><span className="text-xl font-bold text-blue-600">1</span></div>
                 <div className="ml-4">
                     <h4 className="text-xl font-bold text-blue-800">Cấp 1: Khởi tạo (1.0 - 1.79)</h4>
                     <p className="mt-2 text-gray-600">Hoạt động chủ yếu dựa trên kinh nghiệm, tự phát, thiếu quy trình chuẩn hóa. Năng lực cạnh tranh thấp.</p>
                 </div>
             </div>
-            <div className="step-item relative pl-16 pb-12">
+            <div className="relative pl-16 pb-12">
                 <div className="absolute left-[-26px] top-0 flex items-center justify-center w-12 h-12 bg-white border-4 border-blue-300 rounded-full"><span className="text-xl font-bold text-blue-600">2</span></div>
                 <div className="ml-4">
                     <h4 className="text-xl font-bold text-blue-800">Cấp 2: Bắt đầu (1.8 - 2.59)</h4>
                     <p className="mt-2 text-gray-600">Bắt đầu có những thử nghiệm cải tiến hoặc ứng dụng công nghệ nhưng còn rời rạc, thiếu chiến lược tổng thể.</p>
                 </div>
             </div>
-            <div className="step-item relative pl-16 pb-12">
+            <div className="relative pl-16 pb-12">
                 <div className="absolute left-[-26px] top-0 flex items-center justify-center w-12 h-12 bg-white border-4 border-blue-400 rounded-full"><span className="text-xl font-bold text-blue-600">3</span></div>
                 <div className="ml-4">
                     <h4 className="text-xl font-bold text-blue-800">Cấp 3: Hình thành (2.6 - 3.39)</h4>
                     <p className="mt-2 text-gray-600">Đã xây dựng được quy trình, hệ thống cơ bản nhưng việc áp dụng và tích hợp toàn diện còn là thách thức.</p>
                 </div>
             </div>
-            <div className="step-item relative pl-16 pb-12">
+            <div className="relative pl-16 pb-12">
                 <div className="absolute left-[-26px] top-0 flex items-center justify-center w-12 h-12 bg-white border-4 border-blue-500 rounded-full"><span className="text-xl font-bold text-blue-600">4</span></div>
                 <div className="ml-4">
                     <h4 className="text-xl font-bold text-blue-800">Cấp 4: Nâng cao (3.4 - 4.19)</h4>
                     <p className="mt-2 text-gray-600">Vận hành dựa trên quy trình chuẩn hóa, tích hợp và tối ưu bằng công nghệ. Ra quyết định dựa trên dữ liệu.</p>
                 </div>
             </div>
-            <div className="step-item relative pl-16">
+            <div className="relative pl-16">
                 <div className="absolute left-[-26px] top-0 flex items-center justify-center w-12 h-12 bg-white border-4 border-blue-600 rounded-full"><span className="text-xl font-bold text-blue-600">5</span></div>
                 <div className="ml-4">
                     <h4 className="text-xl font-bold text-blue-800">Cấp 5: Dẫn đầu (4.2 - 5.0)</h4>
@@ -161,4 +162,3 @@ export default function LandingPage({ onStart }: LandingPageProps) {
     </div>
   );
 }
-

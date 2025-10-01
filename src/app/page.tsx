@@ -1,22 +1,33 @@
 "use client";
 import { useState } from 'react';
-// Sửa lỗi: Sử dụng đường dẫn alias '@/' là cách làm chuẩn và ổn định nhất
-import LandingPage from '@/components/LandingPage';
-import ChecklistPage from '@/components/ChecklistPage';
-import ResultsPage from '@/components/ResultsPage';
+// Sửa lỗi: Sử dụng đường dẫn tương đối để đảm bảo file luôn được tìm thấy
+import LandingPage from '../components/LandingPage';
+import ChecklistPage from '../components/ChecklistPage';
+import ResultsPage from '../components/ResultsPage';
 
-// Định nghĩa một kiểu dữ liệu chung cho trang thái của ứng dụng
+// Định nghĩa kiểu dữ liệu cho kết quả để sử dụng nhất quán
+export interface ResultsData {
+  companyInfo: { [key: string]: string };
+  scores: Record<string, number>;
+  notes: Record<string, string>;
+  pillarAvgs: number[];
+  totalVipaScore: number;
+  finalRank: string;
+}
+
 type AppState = 'landing' | 'checklist' | 'results';
 
 export default function HomePage() {
   const [currentView, setCurrentView] = useState<AppState>('landing');
-  const [resultsData, setResultsData] = useState<any>(null);
+  // Sử dụng kiểu ResultsData
+  const [resultsData, setResultsData] = useState<ResultsData | null>(null);
 
   const handleStart = () => {
     setCurrentView('checklist');
   };
 
-  const handleShowResults = (results: any) => {
+  // Sử dụng kiểu ResultsData
+  const handleShowResults = (results: ResultsData) => {
     setResultsData(results);
     setCurrentView('results');
   };

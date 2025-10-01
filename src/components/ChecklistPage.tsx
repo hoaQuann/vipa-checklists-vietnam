@@ -1,13 +1,21 @@
 "use client";
 import { useState, Fragment } from 'react';
-import { checklistData } from '@/data/checklistData';
+// Sửa lỗi: Sử dụng đường dẫn tương đối để đảm bảo file luôn được tìm thấy
+import { checklistData } from '../data/checklistData';
 
-// Định nghĩa kiểu dữ liệu cho props mà component này nhận vào
-interface ChecklistPageProps {
-  onShowResults: (results: any) => void;
+// Định nghĩa kiểu dữ liệu cho kết quả
+interface ResultsData {
+  companyInfo: { [key: string]: string };
+  scores: Record<string, number>;
+  notes: Record<string, string>;
+  pillarAvgs: number[];
+  totalVipaScore: number;
+  finalRank: string;
 }
 
-// ... các kiểu dữ liệu khác không đổi
+interface ChecklistPageProps {
+  onShowResults: (results: ResultsData) => void;
+}
 
 export default function ChecklistPage({ onShowResults }: ChecklistPageProps) {
   const [scores, setScores] = useState<Record<string, number>>({});
@@ -43,17 +51,18 @@ export default function ChecklistPage({ onShowResults }: ChecklistPageProps) {
     const pillar = checklistData[pillarIndex];
     if (!pillar) return 0;
 
-    let pillarScoreSum = 0;
-    pillar.indicators.forEach(indicator => {
-      if (scores[indicator.id]) {
-        pillarScoreSum += scores[indicator.id];
-      }
-    });
-    
-    return pillar.indicators.length > 0 ? pillarScoreSum / pillar.indicators.length : 0;
+    const pillarScores = pillar.indicators
+      .map(indicator => scores[indicator.id])
+      .filter(score => score !== undefined);
+
+    if (pillarScores.length === 0) return 0;
+
+    const sum = pillarScores.reduce((a, b) => a + b, 0);
+    // Điểm trung bình được tính trên tổng số câu hỏi của trụ cột
+    return sum / pillar.indicators.length;
   };
   
-  const calculateResults = () => {
+  const calculateResults = (): ResultsData => {
     let totalVipaScore = 0;
     const pillarAvgs: number[] = [];
     const weights: Record<number, number> = { 0: 0.25, 1: 0.25, 2: 0.25, 3: 0.25 };
@@ -88,8 +97,8 @@ export default function ChecklistPage({ onShowResults }: ChecklistPageProps) {
   };
   
   return (
-    <div className="max-w-7xl w-full mx-auto bg-white p-4 sm:p-6 lg:p-8 rounded-lg shadow-lg my-8 animate-fade-in">
-       <h1 className="text-2xl font-bold text-gray-800 mb-6 border-b pb-4">Bảng Đánh giá Mức độ Sẵn sàng (ViPA Checklist)</h1>
+    <div className="max-w-7xl mx-auto bg-white p-4 sm:p-6 lg:p-8 rounded-lg shadow-lg my-8">
+      <h1 className="text-2xl font-bold text-gray-800 mb-6 border-b pb-4">Bảng Đánh giá Mức độ Sẵn sàng (ViPA Checklist)</h1>
       
       <div className="mb-8">
         <h2 className="text-xl font-semibold text-gray-700 mb-3">PHẦN A: THÔNG TIN CHUNG</h2>
@@ -137,6 +146,7 @@ export default function ChecklistPage({ onShowResults }: ChecklistPageProps) {
                                 name={`score_${indicator.id}`}
                                 value={option.score}
                                 onChange={() => handleScoreChange(indicator.id, option.score)}
+                                checked={scores[indicator.id] === option.score}
                                 className="mt-1 flex-shrink-0"
                               />
                               <span className="ml-2 text-sm">{option.text}</span>

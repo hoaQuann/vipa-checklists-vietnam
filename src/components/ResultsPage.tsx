@@ -1,10 +1,9 @@
 "use client";
 import { useEffect, useState } from 'react';
-// Sửa lỗi: Sử dụng đường dẫn tương đối để đảm bảo file luôn được tìm thấy
-import { supabase } from '../lib/supabaseClient';
-import { saveAs } from 'file-saver'; // Import saveAs
+import { supabase } from '@/lib/supabaseClient';
+import { saveAs } from 'file-saver';
 
-// ... (Các interface ResultsData, ResultsPageProps giữ nguyên)
+// Định nghĩa kiểu dữ liệu cho kết quả
 interface ResultsData {
   companyInfo: { [key: string]: string };
   scores: Record<string, number>;
@@ -19,12 +18,10 @@ interface ResultsPageProps {
   onBack: () => void;
 }
 
-
 export default function ResultsPage({ results, onBack }: ResultsPageProps) {
   const [assessmentId, setAssessmentId] = useState<string | null>(null);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'success' | 'error'>('idle');
   const [exportingFormat, setExportingFormat] = useState<'csv' | 'word' | null>(null);
-  const [exportUrls, setExportUrls] = useState<{ csv?: string; word?: string }>({});
   
   const [aiRecommendation, setAiRecommendation] = useState<string | null>(null);
   const [isAiLoading, setIsAiLoading] = useState(false);
@@ -95,19 +92,12 @@ export default function ResultsPage({ results, onBack }: ResultsPageProps) {
       const { url, error } = await response.json();
       if (error) throw new Error(error);
 
-      // Cập nhật CSDL với link mới
       const updateField = format === 'csv' ? 'csv_export_url' : 'word_export_url';
-      const { error: updateError } = await supabase
+      await supabase
         .from('assessments')
         .update({ [updateField]: url })
         .eq('id', assessmentId);
 
-      if (updateError) throw updateError;
-      
-      // Cập nhật UI để hiện link (dự phòng)
-      setExportUrls(prev => ({ ...prev, [format]: url }));
-
-      // TỰ ĐỘNG TẢI FILE VỀ
       const fileName = `VIPA_Report_${(results.companyInfo.name || 'Bao_cao').replace(/ /g, '_')}.${format === 'csv' ? 'csv' : 'doc'}`;
       saveAs(url, fileName);
 
@@ -201,4 +191,3 @@ export default function ResultsPage({ results, onBack }: ResultsPageProps) {
     </div>
   );
 }
-

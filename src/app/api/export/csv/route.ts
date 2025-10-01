@@ -3,12 +3,24 @@ import { createClient } from '@supabase/supabase-js';
 import Papa from 'papaparse';
 import { checklistData } from '@/data/checklistData';
 
-// Hàm này sẽ chạy trên server
+// Định nghĩa kiểu dữ liệu cho request body
+interface ExportRequestBody {
+  results: {
+    companyInfo: { [key: string]: string };
+    scores: Record<string, number>;
+    notes: Record<string, string>;
+    pillarAvgs: number[];
+    totalVipaScore: number;
+    finalRank: string;
+  };
+  assessmentId: string;
+  aiRecommendation: string | null;
+}
+
 export async function POST(request: Request) {
   try {
-    const { results, assessmentId, aiRecommendation } = await request.json();
+    const { results, assessmentId, aiRecommendation }: ExportRequestBody = await request.json();
 
-    // 1. Tạo nội dung CSV chi tiết
     const generalInfo = [
         ["Tên Doanh nghiệp:", results.companyInfo.name],
         ["Số điện thoại:", results.companyInfo.phoneNumber],
@@ -40,7 +52,8 @@ export async function POST(request: Request) {
     summary.push(["", "", "TỔNG ĐIỂM ViPA", results.totalVipaScore.toFixed(2)]);
     summary.push(["", "", "KẾT LUẬN", results.finalRank]);
     
-    let finalCsvData: (string | number)[][] = [...generalInfo, [], ...detailedScores, ...summary];
+    // Sửa lỗi: Sử dụng const vì không gán lại
+    const finalCsvData: (string | number)[][] = [...generalInfo, [], ...detailedScores, ...summary];
 
     if (aiRecommendation) {
         finalCsvData.push([]);
@@ -50,7 +63,6 @@ export async function POST(request: Request) {
 
     const csvString = Papa.unparse(finalCsvData);
 
-    // 2. Kết nối và upload lên Supabase
     const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
     const filePath = `reports/${assessmentId}/report-${Date.now()}.csv`;
     const { error: uploadError } = await supabaseAdmin.storage.from('exports').upload(filePath, csvString, { contentType: 'text/csv;charset=utf-8', upsert: false });
@@ -60,9 +72,10 @@ export async function POST(request: Request) {
     if (!publicUrlData) throw new Error("Could not get public URL for CSV");
 
     return NextResponse.json({ url: publicUrlData.publicUrl });
-  } catch (error: any) {
-    console.error("Lỗi API xuất CSV:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    // Sửa lỗi: Cung cấp kiểu cho error
+    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+    console.error("Lỗi API xuất CSV:", errorMessage);
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
-
