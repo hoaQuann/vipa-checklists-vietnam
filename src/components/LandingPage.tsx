@@ -1,55 +1,11 @@
 "use client";
-import { useEffect } from 'react';
-import Chart, { type TooltipItem } from 'chart.js/auto';
+// Sửa lỗi: Import component biểu đồ từ file riêng
+import WeightingChart from './WeightingChart';
 
 // Định nghĩa kiểu dữ liệu cho props mà component này nhận vào
 interface LandingPageProps {
   onStart: () => void; // onStart là một hàm không có tham số, không trả về gì
 }
-
-// Component biểu đồ trọng số
-const WeightingChart = () => {
-  useEffect(() => {
-    const canvas = document.getElementById('weightingChart') as HTMLCanvasElement;
-    if (!canvas) return;
-
-    const existingChart = Chart.getChart(canvas);
-    if (existingChart) {
-      existingChart.destroy();
-    }
-
-    new Chart(canvas.getContext('2d')!, {
-      type: 'doughnut',
-      data: {
-        labels: ['Quản lý Doanh nghiệp', 'Quản lý Năng suất', 'Hạ tầng cho CĐS', 'Sản xuất Thông minh'],
-        datasets: [{
-          data: [25, 25, 25, 25],
-          backgroundColor: ['#004AAD', '#0076D1', '#00AEEF', '#80D8F7'],
-          borderColor: '#ffffff',
-          borderWidth: 4,
-          hoverOffset: 8
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            callbacks: {
-              // Sửa lỗi type 'any'
-              label: (context: TooltipItem<'doughnut'>) => `${context.label}: ${context.parsed}%`
-            }
-          }
-        },
-        cutout: '60%'
-      }
-    });
-  }, []);
-
-  return <div className="relative mx-auto h-[300px] w-[300px]"><canvas id="weightingChart"></canvas></div>;
-};
-
 
 // Component LandingPage đầy đủ, tái tạo chính xác từ file HTML gốc
 export default function LandingPage({ onStart }: LandingPageProps) {
@@ -101,6 +57,7 @@ export default function LandingPage({ onStart }: LandingPageProps) {
               <div className="flex items-center"><div className="w-4 h-4 rounded-full mr-3 bg-[#80D8F7]"></div><span>Sản xuất Thông minh: <b>25%</b></span></div>
             </div>
           </div>
+          {/* Sử dụng component biểu đồ đã được import */}
           <WeightingChart />
         </div>
       </section>
