@@ -2,8 +2,9 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { saveAs } from 'file-saver';
+import { marked } from 'marked'; // Import thư viện marked
 
-// Định nghĩa kiểu dữ liệu cho kết quả
+// ... (Các interface ResultsData, ResultsPageProps không đổi)
 interface ResultsData {
   companyInfo: { [key: string]: string };
   scores: Record<string, number>;
@@ -59,7 +60,7 @@ export default function ResultsPage({ results, onBack }: ResultsPageProps) {
     setIsAiLoading(true);
     setAiRecommendation(null);
     try {
-      const response = await fetch('/api/ai/recommendation', {
+      const response = await fetch('/api/recommendation', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ results }),
@@ -68,8 +69,9 @@ export default function ResultsPage({ results, onBack }: ResultsPageProps) {
       if (data.error) throw new Error(data.error);
       setAiRecommendation(data.recommendation);
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Đã xảy ra lỗi không xác định";
       console.error("Lỗi khi lấy gợi ý AI:", error);
-      setAiRecommendation("Đã xảy ra lỗi khi lấy gợi ý từ AI.");
+      setAiRecommendation(`**Đã xảy ra lỗi:** ${errorMessage}`);
     } finally {
       setIsAiLoading(false);
     }
@@ -123,7 +125,7 @@ export default function ResultsPage({ results, onBack }: ResultsPageProps) {
       </div>
       
        <div className="mt-8">
-        <h2 className="text-xl font-semibold text-gray-700 mb-3">PHẦN C: BẢNG TỔNG HỢP KẾT QUẢ ĐÁNH GIÁ</h2>
+        <h2 className="text-xl font-semibold text-gray-700 mb-3">BẢNG TỔNG HỢP KẾT QUẢ</h2>
         <div className="overflow-x-auto">
           <table className="min-w-full border-collapse border border-gray-300">
             <thead className="bg-gray-100 font-semibold">
@@ -165,9 +167,12 @@ export default function ResultsPage({ results, onBack }: ResultsPageProps) {
             {isAiLoading ? 'AI đang phân tích...' : '✨ Nhận Gợi ý AI'}
           </button>
         </div>
+        {/* Hiển thị kết quả AI */}
         {aiRecommendation && (
-          <div className="prose max-w-none p-4 bg-gray-50 rounded-lg border" dangerouslySetInnerHTML={{ __html: aiRecommendation.replace(/\n/g, '<br />') }}>
-          </div>
+          <div 
+            className="prose max-w-none p-4 bg-gray-50 rounded-lg border" 
+            dangerouslySetInnerHTML={{ __html: marked(aiRecommendation) }}
+          />
         )}
       </div>
 
