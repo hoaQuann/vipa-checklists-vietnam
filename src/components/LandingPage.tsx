@@ -1,60 +1,16 @@
 "use client";
-import { useEffect } from 'react';
-import Chart, { type TooltipItem } from 'chart.js/auto';
+
+import WeightingChart from './WeightingChart';
 
 // Định nghĩa kiểu dữ liệu cho props mà component này nhận vào
 interface LandingPageProps {
   onStart: () => void; // onStart là một hàm không có tham số, không trả về gì
 }
 
-// Component biểu đồ trọng số
-const WeightingChart = () => {
-  useEffect(() => {
-    const canvas = document.getElementById('weightingChart') as HTMLCanvasElement;
-    if (!canvas) return;
-
-    const existingChart = Chart.getChart(canvas);
-    if (existingChart) {
-      existingChart.destroy();
-    }
-
-    new Chart(canvas.getContext('2d')!, {
-      type: 'doughnut',
-      data: {
-        labels: ['Sản xuất Thông minh', 'Quản lý Năng suất', 'Hệ thống hạ tầng cho CĐS', 'Quản lý Doanh nghiệp'],
-        datasets: [{
-          data: [25, 25, 25, 25],
-          backgroundColor: ['#004AAD', '#0076D1', '#00AEEF', '#80D8F7'],
-          borderColor: '#ffffff',
-          borderWidth: 4,
-          hoverOffset: 8
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            callbacks: {
-              // Sửa lỗi type 'any'
-              label: (context: TooltipItem<'doughnut'>) => `${context.label}: ${context.parsed}%`
-            }
-          }
-        },
-        cutout: '60%'
-      }
-    });
-  }, []);
-
-  return <div className="relative mx-auto h-[300px] w-[300px]"><canvas id="weightingChart"></canvas></div>;
-};
-
-
-// Component LandingPage đầy đủ, tái tạo chính xác từ file HTML gốc
+// Component LandingPage đầy đủ, được chuyển đổi chính xác từ file HTML gốc
 export default function LandingPage({ onStart }: LandingPageProps) {
   return (
-    <div className="container mx-auto p-4 sm:p-8 bg-white shadow-lg rounded-lg my-8 w-full max-w-7xl animate-fade-in">
+    <div className="container mx-auto p-4 sm:p-8 bg-white shadow-lg rounded-lg my-8 w-full max-w-7xl">
       {/* Header */}
       <header className="text-center mb-16">
         <h1 className="text-4xl md:text-5xl font-extrabold text-[#004AAD]">Phương pháp luận ViPA</h1>
