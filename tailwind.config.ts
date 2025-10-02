@@ -1,14 +1,14 @@
-import type { Config } from 'tailwindcss'
+import type { Config } from "tailwindcss";
 
 const config: Config = {
-  // ĐÂY LÀ PHẦN THAY ĐỔI QUAN TRỌNG
-  // Chúng ta cần đảm bảo Tailwind quét tất cả các file trong thư mục 'src'
   content: [
-    './src/**/*.{js,ts,jsx,tsx,mdx}',
+    "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
     extend: {},
   },
   plugins: [],
-}
-export default config
+};
+export default config;
