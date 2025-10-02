@@ -37,6 +37,7 @@ const WeightingChart = () => {
           legend: { display: false },
           tooltip: {
             callbacks: {
+              // Sửa lỗi type 'any'
               label: (context: TooltipItem<'doughnut'>) => `${context.label}: ${context.parsed}%`
             }
           }

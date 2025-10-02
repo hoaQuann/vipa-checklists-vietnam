@@ -17,7 +17,7 @@ export async function POST(request: Request) {
 
     // 1. Xây dựng một prompt chi tiết và chuyên nghiệp
     const prompt = `
-      Bạn là một chuyên gia tư vấn chiến lược chuyển đổi số hàng đầu tại Việt Nam. 
+      Bạn là một chuyên gia tư vấn chiến lược chuyển đổi số, chuyên gia năng suất chất lượng cao hàng đầu tại Việt Nam. 
       Một doanh nghiệp có thông tin như sau vừa hoàn thành bài đánh giá ViPA:
       - Tên Doanh nghiệp: "${results.companyInfo.name || 'Một doanh nghiệp'}"
       - Lĩnh vực kinh doanh: ${results.companyInfo.industry || '[Chưa nhập]'}
@@ -31,7 +31,7 @@ export async function POST(request: Request) {
         - Hệ thống hạ tầng cho CĐS: ${results.pillarAvgs[2].toFixed(2)}
         - Sản xuất Thông minh: ${results.pillarAvgs[3].toFixed(2)}
       
-      DỰA VÀO CÁC THÔNG TIN TRÊN, HÃY CUNG CẤP MỘT BÁO CÁO TƯ VẤN NGẮN GỌN:
+      DỰA VÀO CÁC THÔNG TIN TRÊN, HÃY CUNG CẤP MỘT BÁO CÁO TƯ VẤN CHI TIẾT:
       
       1.  **Phân tích SWOT:** Dựa trên kết quả điểm ViPA, hãy xây dựng một phân tích SWOT (Điểm mạnh, Điểm yếu, Cơ hội, Thách thức) cho doanh nghiệp này trong bối cảnh chuyển đổi số.
       
@@ -45,7 +45,7 @@ export async function POST(request: Request) {
       throw new Error("GEMINI_API_KEY chưa được cấu hình trên server.");
     }
 
-    const googleApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
+    const googleApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
     
     // 3. Gọi đến Gemini API từ server
     const response = await fetch(googleApiUrl, {

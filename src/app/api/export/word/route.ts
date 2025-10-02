@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { checklistData } from '@/data/checklistData';
+// Import thư viện marked trên server
+import { marked } from 'marked';
 
-// Định nghĩa kiểu dữ liệu cho request body
+// ... (Interface ExportRequestBody không đổi)
 interface ExportRequestBody {
   results: {
     companyInfo: { [key: string]: string };
@@ -20,8 +22,8 @@ export async function POST(request: Request) {
   try {
     const { results, assessmentId, aiRecommendation }: ExportRequestBody = await request.json();
 
+    // Toàn bộ logic tạo HTML cho các phần A, B, C không đổi
     let htmlContent = `<!DOCTYPE html><html><head><meta charset='utf-8'><title>Báo cáo ViPA</title></head><body>`;
-    
     htmlContent += `<h1>BÁO CÁO ĐÁNH GIÁ MỨC ĐỘ SẴN SÀNG CHUYỂN ĐỔI SỐ (ViPA)</h1>`;
     htmlContent += `<h2>PHẦN A: THÔNG TIN CHUNG</h2>`;
     htmlContent += `<table border="1" cellpadding="5" style="border-collapse: collapse; width: 100%;"><tbody>
@@ -31,7 +33,7 @@ export async function POST(request: Request) {
         <tr><td><b>Người liên hệ</b></td><td>${results.companyInfo.contactPerson || ''}</td></tr>
         <tr><td><b>Ngày đánh giá</b></td><td>${results.companyInfo.assessmentDate || ''}</td></tr>
     </tbody></table>`;
-    
+
     htmlContent += `<h2>PHẦN B: BẢNG TỔNG HỢP KẾT QUẢ</h2>`;
     htmlContent += `<table border="1" cellpadding="5" style="border-collapse: collapse; width: 100%;">
         <thead><tr><th>Trụ cột</th><th>Điểm Trung bình</th><th>Trọng số (%)</th><th>Điểm theo Trọng số</th></tr></thead><tbody>`;
@@ -55,13 +57,17 @@ export async function POST(request: Request) {
     });
     htmlContent += `</tbody></table>`;
     
+    // THAY ĐỔI QUAN TRỌNG: Sử dụng `marked` để chuyển đổi Markdown sang HTML
     if (aiRecommendation) {
       htmlContent += `<h2>PHẦN D: LỘ TRÌNH HÀNH ĐỘNG DO AI ĐỀ XUẤT</h2>`;
-      htmlContent += `<div>${aiRecommendation.replace(/\n/g, '<br>')}</div>`;
+      // Chuyển đổi Markdown sang HTML trước khi thêm vào
+      const aiHtml = marked.parse(aiRecommendation);
+      htmlContent += `<div>${aiHtml}</div>`;
     }
     
     htmlContent += `</body></html>`;
 
+    // Logic upload lên Supabase không đổi
     const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
     const filePath = `reports/${assessmentId}/report-${Date.now()}.doc`;
     const { error: uploadError } = await supabaseAdmin.storage.from('exports').upload(filePath, htmlContent, { contentType: 'application/msword;charset=utf-8', upsert: false });
@@ -71,8 +77,8 @@ export async function POST(request: Request) {
     if (!publicUrlData) throw new Error("Could not get public URL for Word");
 
     return NextResponse.json({ url: publicUrlData.publicUrl });
+
   } catch (error) {
-    // Sửa lỗi: Cung cấp kiểu cho error
     const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
     console.error("Lỗi API xuất Word:", errorMessage);
     return NextResponse.json({ error: errorMessage }, { status: 500 });
