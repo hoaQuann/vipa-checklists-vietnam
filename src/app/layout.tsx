@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-
-// ĐẢM BẢO DÒNG NÀY LUÔN ĐƯỢC IMPORT: Đây là chìa khóa để nạp CSS của Tailwind
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -18,8 +16,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="vi" suppressHydrationWarning>
-      {/* Áp dụng font chữ cho toàn bộ trang */}
-      <body className={inter.className}>{children}</body>
+      {/* Thêm suppressHydrationWarning trực tiếp vào thẻ body để xử lý lỗi triệt để */}
+      <body className={inter.className} suppressHydrationWarning>
+        {children}
+      </body>
     </html>
   );
 }

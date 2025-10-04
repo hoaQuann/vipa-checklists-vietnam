@@ -1,5 +1,5 @@
 "use client";
-import { useState, Fragment } from 'react';
+import { useState, Fragment, useEffect } from 'react';
 // Sửa lỗi: Sử dụng đường dẫn tương đối để đảm bảo file luôn được tìm thấy
 import { checklistData } from '../data/checklistData';
 
@@ -28,8 +28,17 @@ export default function ChecklistPage({ onShowResults }: ChecklistPageProps) {
     phoneNumber: '',
     mainProduct: '',
     industry: '',
-    assessmentDate: new Date().toISOString().split('T')[0],
+    // KHỞI TẠO RỖNG ĐỂ TRÁNH LỖI HYDRATION
+    assessmentDate: '', 
   });
+
+  // SỬA LỖI: Đặt ngày tháng mặc định ở phía client bằng useEffect
+  useEffect(() => {
+    setCompanyInfo(prev => ({
+      ...prev,
+      assessmentDate: new Date().toISOString().split('T')[0]
+    }));
+  }, []); // Mảng rỗng đảm bảo useEffect chỉ chạy một lần sau khi component được render
 
   const handleInfoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
