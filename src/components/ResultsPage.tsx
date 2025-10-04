@@ -2,7 +2,9 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { saveAs } from 'file-saver';
-import { marked } from 'marked'; // Import thư viện marked
+import { marked } from 'marked';
+// Import component AIModal vừa tạo
+import AIModal from './AIModal';
 
 // ... (Các interface ResultsData, ResultsPageProps không đổi)
 interface ResultsData {
@@ -26,6 +28,9 @@ export default function ResultsPage({ results, onBack }: ResultsPageProps) {
   
   const [aiRecommendation, setAiRecommendation] = useState<string | null>(null);
   const [isAiLoading, setIsAiLoading] = useState(false);
+  // State để quản lý việc đóng/mở modal
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
 
   useEffect(() => {
     const saveResults = async () => {
@@ -57,6 +62,7 @@ export default function ResultsPage({ results, onBack }: ResultsPageProps) {
   }, [results, assessmentId]);
 
   const handleGetAI = async () => {
+    setIsModalOpen(true); // Mở modal ngay lập tức
     setIsAiLoading(true);
     setAiRecommendation(null);
     try {
@@ -115,84 +121,85 @@ export default function ResultsPage({ results, onBack }: ResultsPageProps) {
   const pillarNames = ["1. Quản lý Doanh nghiệp", "2. Quản lý Năng suất", "3. Hệ thống hạ tầng cho CĐS", "4. Sản xuất Thông minh"];
 
   return (
-    <div className="max-w-4xl w-full mx-auto bg-white p-4 sm:p-6 lg:p-8 rounded-lg shadow-lg my-8 animate-fade-in">
-      <h1 className="text-2xl font-bold text-gray-800 mb-6 border-b pb-4 text-center">KẾT QUẢ ĐÁNH GIÁ</h1>
-      
-       <div className="mt-2 text-center text-sm text-gray-500">
-        {saveStatus === 'saving' && <p>Đang lưu kết quả...</p>}
-        {saveStatus === 'success' && <p className="text-green-600">Lưu kết quả thành công!</p>}
-        {saveStatus === 'error' && <p className="text-red-600">Lưu kết quả thất bại. Vui lòng thử lại.</p>}
-      </div>
-      
-       <div className="mt-8">
-        <h2 className="text-xl font-semibold text-gray-700 mb-3">BẢNG TỔNG HỢP KẾT QUẢ</h2>
-        <div className="overflow-x-auto">
-          <table className="min-w-full border-collapse border border-gray-300">
-            <thead className="bg-gray-100 font-semibold">
-              <tr>
-                <th className="p-3 border border-gray-300 text-left">Trụ cột</th>
-                <th className="p-3 border border-gray-300">Điểm Trung bình</th>
-                <th className="p-3 border border-gray-300">Trọng số (%)</th>
-                <th className="p-3 border border-gray-300">Điểm theo Trọng số</th>
-              </tr>
-            </thead>
-            <tbody>
-              {results.pillarAvgs.map((avg, index) => {
-                 const weightedScore = avg * weights[index];
-                 return (
-                    <tr key={index}>
-                      <td className="p-3 border border-gray-300">{pillarNames[index]}</td>
-                      <td className="p-3 border border-gray-300 text-center">{avg.toFixed(2)}</td>
-                      <td className="p-3 border border-gray-300 text-center">{weights[index] * 100}%</td>
-                      <td className="p-3 border border-gray-300 text-center">{weightedScore.toFixed(2)}</td>
-                    </tr>
-                 )
-              })}
-              <tr className="bg-blue-100 text-lg font-bold">
-                <td colSpan={3} className="p-3 border border-gray-300 text-right">TỔNG ĐIỂM ViPA</td>
-                <td className="p-3 border border-gray-300 text-center">{results.totalVipaScore.toFixed(2)}</td>
-              </tr>
-            </tbody>
-          </table>
+    <>
+      <div className="max-w-4xl w-full mx-auto bg-white p-4 sm:p-6 lg:p-8 rounded-lg shadow-lg my-8 animate-fade-in">
+        <h1 className="text-2xl font-bold text-gray-800 mb-6 border-b pb-4 text-center">KẾT QUẢ ĐÁNH GIÁ</h1>
+        
+        <div className="mt-2 text-center text-sm text-gray-500">
+          {saveStatus === 'saving' && <p>Đang lưu kết quả...</p>}
+          {saveStatus === 'success' && <p className="text-green-600">Lưu kết quả thành công!</p>}
+          {saveStatus === 'error' && <p className="text-red-600">Lưu kết quả thất bại. Vui lòng thử lại.</p>}
+        </div>
+        
+        <div className="mt-8">
+          <h2 className="text-xl font-semibold text-gray-700 mb-3 uppercase">Phần C: Bảng tổng hợp kết quả đánh giá</h2>
+          <div className="overflow-x-auto">
+            <table className="min-w-full border-collapse border border-gray-300">
+              <thead className="bg-gray-100 font-semibold">
+                <tr>
+                  <th className="p-3 border border-gray-300 text-left">Trụ cột</th>
+                  <th className="p-3 border border-gray-300">Điểm Trung bình</th>
+                  <th className="p-3 border border-gray-300">Trọng số (%)</th>
+                  <th className="p-3 border border-gray-300">Điểm theo Trọng số</th>
+                </tr>
+              </thead>
+              <tbody>
+                {results.pillarAvgs.map((avg, index) => {
+                   const weightedScore = avg * weights[index];
+                   return (
+                      <tr key={index}>
+                        <td className="p-3 border border-gray-300">{pillarNames[index]}</td>
+                        <td className="p-3 border border-gray-300 text-center">{avg.toFixed(2)}</td>
+                        <td className="p-3 border border-gray-300 text-center">{weights[index] * 100}%</td>
+                        <td className="p-3 border border-gray-300 text-center">{weightedScore.toFixed(2)}</td>
+                      </tr>
+                   )
+                })}
+                <tr className="bg-blue-100 text-lg font-bold">
+                  <td colSpan={3} className="p-3 border border-gray-300 text-right">TỔNG ĐIỂM ViPA</td>
+                  <td className="p-3 border border-gray-300 text-center">{results.totalVipaScore.toFixed(2)}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div className="mt-8 text-center">
+          <h2 className="text-xl font-semibold text-gray-700 mb-3 uppercase">Kết luận mức độ sẵn sàng: <span className="text-blue-600 font-bold">{results.finalRank}</span></h2>
+        </div>
+
+        {/* CẤU TRÚC LẠI CÁC NÚT BẤM */}
+        <div className="mt-10 border-t pt-8">
+          <div className="flex flex-wrap justify-center items-center gap-4">
+            
+            <button onClick={onBack} className="flex items-center gap-2 bg-gray-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-700 transition duration-300">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fillRule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/></svg>
+              Quay lại Checklist
+            </button>
+
+            <button onClick={handleGetAI} disabled={isAiLoading} className="flex items-center gap-2 bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-300 disabled:opacity-50">
+              ✨ Nhận Gợi ý AI
+            </button>
+            
+            <button onClick={() => handleExport('csv')} disabled={exportingFormat !== null || !assessmentId} className="flex items-center gap-2 bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition duration-300 disabled:opacity-50">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L6.354 8.146a.5.5 0 0 0-.708.708l2 2z"/></svg>
+              {exportingFormat === 'csv' ? 'Đang xử lý...' : 'Xuất ra file CSV'}
+            </button>
+            
+            <button onClick={() => handleExport('word')} disabled={exportingFormat !== null || !assessmentId} className="flex items-center gap-2 bg-purple-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-purple-700 transition duration-300 disabled:opacity-50">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L6.354 8.146a.5.5 0 0 0-.708.708l2 2z"/></svg>
+              {exportingFormat === 'word' ? 'Đang xử lý...' : 'Xuất ra file Word'}
+            </button>
+          </div>
         </div>
       </div>
-      <div className="mt-8 text-center">
-        <h2 className="text-xl font-semibold text-gray-700 mb-3">KẾT LUẬN MỨC ĐỘ SẴN SÀNG: <span className="text-blue-600 font-bold">{results.finalRank}</span></h2>
-      </div>
 
-      <div className="mt-10 border-t pt-6">
-        <h3 className="text-lg font-semibold text-center mb-4">Lộ trình Hành động do AI đề xuất</h3>
-        <div className="text-center mb-4">
-           <button onClick={handleGetAI} disabled={isAiLoading} className="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-300 disabled:opacity-50">
-            {isAiLoading ? 'AI đang phân tích...' : '✨ Nhận Gợi ý AI'}
-          </button>
-        </div>
-        {/* Hiển thị kết quả AI */}
-        {aiRecommendation && (
-          <div 
-            className="prose max-w-none p-4 bg-gray-50 rounded-lg border" 
-            dangerouslySetInnerHTML={{ __html: marked(aiRecommendation) }}
-          />
-        )}
-      </div>
-
-      <div className="mt-10 border-t pt-6">
-        <h3 className="text-lg font-semibold text-center mb-4">Báo cáo & Tải về</h3>
-        <div className="flex justify-center items-center gap-4">
-          <button onClick={() => handleExport('csv')} disabled={exportingFormat !== null || !assessmentId} className="bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition duration-300 disabled:opacity-50">
-            {exportingFormat === 'csv' ? 'Đang xử lý...' : 'Tải CSV'}
-          </button>
-          <button onClick={() => handleExport('word')} disabled={exportingFormat !== null || !assessmentId} className="bg-purple-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-purple-700 transition duration-300 disabled:opacity-50">
-            {exportingFormat === 'word' ? 'Đang xử lý...' : 'Tải Word'}
-          </button>
-        </div>
-      </div>
-
-      <div className="mt-10 flex flex-col sm:flex-row justify-center items-center gap-4 flex-wrap border-t pt-6">
-        <button onClick={onBack} className="bg-gray-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-600 transition duration-300">
-          Quay lại Checklist
-        </button>
-      </div>
-    </div>
+      {/* Render component Modal */}
+      <AIModal 
+        isOpen={isModalOpen}
+        isLoading={isAiLoading}
+        recommendation={aiRecommendation}
+        onClose={() => setIsModalOpen(false)}
+      />
+    </>
   );
 }

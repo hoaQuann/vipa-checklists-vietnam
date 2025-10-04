@@ -45,7 +45,7 @@ export async function POST(request: Request) {
       throw new Error("GEMINI_API_KEY chưa được cấu hình trên server.");
     }
 
-    const googleApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+    const googleApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
     
     // 3. Gọi đến Gemini API từ server
     const response = await fetch(googleApiUrl, {

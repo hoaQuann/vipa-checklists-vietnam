@@ -1,5 +1,6 @@
 "use client";
-import { useState } from 'react';
+import { useState, useEffect } from 'react'; // Import useEffect
+// Sửa lỗi: Sử dụng đường dẫn tương đối để đảm bảo file luôn được tìm thấy
 import LandingPage from '../components/LandingPage';
 import ChecklistPage from '../components/ChecklistPage';
 import ResultsPage from '../components/ResultsPage';
@@ -18,12 +19,19 @@ type AppState = 'landing' | 'checklist' | 'results';
 
 export default function HomePage() {
   const [currentView, setCurrentView] = useState<AppState>('landing');
+  // Sử dụng kiểu ResultsData
   const [resultsData, setResultsData] = useState<ResultsData | null>(null);
+
+  // SỬA LỖI: Thêm useEffect để cuộn lên đầu trang khi view thay đổi
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [currentView]); // Hook này sẽ chạy mỗi khi giá trị `currentView` thay đổi
 
   const handleStart = () => {
     setCurrentView('checklist');
   };
 
+  // Sử dụng kiểu ResultsData
   const handleShowResults = (results: ResultsData) => {
     setResultsData(results);
     setCurrentView('results');
@@ -33,12 +41,9 @@ export default function HomePage() {
     setCurrentView('checklist');
   };
 
-  // **SỬA LỖI QUAN TRỌNG:**
-  // Xóa các class flexbox căn giữa khỏi thẻ <main>.
-  // Điều này cho phép các component con (LandingPage, ChecklistPage, etc.)
-  // tự kiểm soát bố cục và chiều rộng của chúng, đúng với thiết kế ban đầu.
   return (
-    <main className="min-h-screen bg-slate-100">
+    // Bỏ các class căn giữa để component con tự quyết định layout
+    <main className="min-h-screen bg-slate-50">
       {currentView === 'landing' && <LandingPage onStart={handleStart} />}
       {currentView === 'checklist' && <ChecklistPage onShowResults={handleShowResults} />}
       {currentView === 'results' && resultsData && (
