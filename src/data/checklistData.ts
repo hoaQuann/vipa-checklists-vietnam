@@ -3,7 +3,19 @@
 
 export const checklistData = [
     {
+      id: 1, // Thêm ID để định danh
       pillar: "TRỤ CỘT 1: QUẢN LÝ DOANH NGHIỆP",
+      detailedDescription: `
+        <p class="mb-4">Trụ cột Quản lý Doanh nghiệp là nền tảng cốt lõi, quyết định sự thành bại của quá trình chuyển đổi số. Nó không chỉ đơn thuần là việc quản lý các hoạt động hàng ngày, mà còn bao gồm việc xây dựng một tầm nhìn chiến lược, một văn hóa tổ chức sẵn sàng cho sự thay đổi, và phát triển nguồn nhân lực có đủ năng lực để thực thi chiến lược đó.</p>
+        <h3 class="text-lg font-semibold mb-2">Các yếu tố chính bao gồm:</h3>
+        <ul class="list-disc list-inside space-y-2">
+            <li><strong>Sự lãnh đạo & Tầm nhìn chiến lược:</strong> Ban lãnh đạo phải có một tầm nhìn rõ ràng về chuyển đổi số, không chỉ là một dự án công nghệ mà là một sự chuyển đổi toàn diện về mô hình kinh doanh.</li>
+            <li><strong>Định hướng Khách hàng:</strong> Lấy khách hàng làm trung tâm, sử dụng công nghệ để thấu hiểu và cải thiện trải nghiệm của họ trên mọi điểm chạm.</li>
+            <li><strong>Phát triển Nguồn nhân lực:</strong> Đầu tư vào đào tạo, nâng cao kỹ năng số cho nhân viên và xây dựng chính sách thu hút, giữ chân nhân tài.</li>
+            <li><strong>Văn hóa Đổi mới:</strong> Khuyến khích sự sáng tạo, chấp nhận thử nghiệm và thất bại, và có một hệ thống để quản lý tri thức và tài sản trí tuệ.</li>
+        </ul>
+        <p class="mt-4">Một doanh nghiệp có nền tảng quản trị vững chắc sẽ dễ dàng tiếp nhận và triển khai thành công các công nghệ mới, trong khi một doanh nghiệp yếu về quản trị sẽ gặp rất nhiều khó khăn dù có đầu tư bao nhiêu vào công nghệ.</p>
+      `,
       indicators: [
         {
           id: "1.1",
@@ -56,7 +68,18 @@ export const checklistData = [
       ],
     },
     {
+      id: 2,
       pillar: "TRỤ CỘT 2: QUẢN LÝ NĂNG SUẤT",
+      detailedDescription: `
+        <p class="mb-4">Quản lý Năng suất là "cỗ máy vận hành" của doanh nghiệp. Trước khi áp dụng các công nghệ 4.0 phức tạp, việc tối ưu hóa, chuẩn hóa và số hóa các quy trình hiện tại là bước đi tiên quyết. Trụ cột này đánh giá năng lực của doanh nghiệp trong việc liên tục cải tiến để hoạt động hiệu quả hơn, giảm lãng phí và nâng cao chất lượng sản phẩm/dịch vụ.</p>
+        <h3 class="text-lg font-semibold mb-2">Các yếu tố chính bao gồm:</h3>
+        <ul class="list-disc list-inside space-y-2">
+            <li><strong>Áp dụng Tiêu chuẩn & Công cụ:</strong> Mức độ áp dụng các hệ thống quản lý chất lượng (như ISO 9001) và các công cụ cải tiến năng suất (như 5S, Kaizen, Lean, Six Sigma).</li>
+            <li><strong>Kiểm soát Quá trình:</strong> Năng lực giám sát, đo lường và kiểm soát các quy trình sản xuất, kinh doanh để đảm bảo sự ổn định và chất lượng đầu ra.</li>
+            <li><strong>Quản lý Hiệu suất:</strong> Việc thiết lập các chỉ số đo lường hiệu suất (KPIs), theo dõi hiệu suất thiết bị (OEE) và hiệu suất lao động để ra quyết định dựa trên dữ liệu.</li>
+        </ul>
+        <p class="mt-4">Một hệ thống quản lý năng suất hiệu quả sẽ tạo ra một nền tảng dữ liệu vận hành tin cậy, là đầu vào quý giá cho các hệ thống sản xuất thông minh và phân tích dữ liệu lớn sau này.</p>
+      `,
       indicators: [
           {
               id: "2.1",
@@ -109,7 +132,19 @@ export const checklistData = [
       ]
     },
     {
+      id: 3,
       pillar: "TRỤ CỘT 3: HỆ THỐNG HẠ TẦNG CHO CHUYỂN ĐỔI SỐ",
+      detailedDescription: `
+        <p class="mb-4">Đây là "xương sống" công nghệ của doanh nghiệp trong kỷ nguyên số. Hạ tầng cho chuyển đổi số không chỉ là máy tính và mạng internet, mà còn bao gồm các hệ thống phần mềm, nền tảng dữ liệu và năng lực của đội ngũ IT để hỗ trợ và triển khai các sáng kiến số.</p>
+        <h3 class="text-lg font-semibold mb-2">Các yếu tố chính bao gồm:</h3>
+        <ul class="list-disc list-inside space-y-2">
+            <li><strong>Nền tảng Cơ sở vật chất:</strong> Chất lượng của hệ thống máy tính, mạng nội bộ, kết nối internet và năng lực của đội ngũ IT.</li>
+            <li><strong>Chiến lược Chuyển đổi số:</strong> Sự tồn tại của một lộ trình, kế hoạch và ngân sách rõ ràng cho việc triển khai các dự án chuyển đổi số.</li>
+            <li><strong>Ứng dụng Phần mềm:</strong> Mức độ sử dụng các phần mềm chuyên dụng (như ERP, CRM, MES) để số hóa và quản lý các hoạt động cốt lõi của doanh nghiệp.</li>
+            <li><strong>Quản lý Dữ liệu:</strong> Năng lực thu thập, lưu trữ, bảo mật và khai thác dữ liệu từ các hoạt động sản xuất kinh doanh.</li>
+        </ul>
+        <p class="mt-4">Một hạ tầng số vững chắc không chỉ giúp doanh nghiệp vận hành hiệu quả hơn mà còn tạo ra lợi thế cạnh tranh, cho phép doanh nghiệp nhanh chóng thích ứng và triển khai các mô hình kinh doanh mới.</p>
+      `,
       indicators: [
           {
               id: "3.1",
@@ -162,7 +197,19 @@ export const checklistData = [
       ]
     },
     {
+      id: 4,
       pillar: "TRỤ CỘT 4: SẢN XUẤT THÔNG MINH",
+      detailedDescription: `
+        <p class="mb-4">Sản xuất Thông minh là cấp độ cao nhất trong lộ trình chuyển đổi số của một doanh nghiệp sản xuất, nơi các công nghệ của cuộc Cách mạng Công nghiệp 4.0 được ứng dụng để tạo ra một hệ sinh thái sản xuất kết nối, tự động và thông minh.</p>
+        <h3 class="text-lg font-semibold mb-2">Các yếu tố chính bao gồm:</h3>
+        <ul class="list-disc list-inside space-y-2">
+            <li><strong>Kết nối & Tích hợp (IoT):</strong> Mức độ sử dụng cảm biến để thu thập dữ liệu thời gian thực từ máy móc, thiết bị và kết nối chúng thành một hệ thống đồng nhất.</li>
+            <li><strong>Tự động hóa & Robotics:</strong> Việc áp dụng robot công nghiệp, hệ thống tự hành (AGV) để tự động hóa các công đoạn lặp đi lặp lại, nguy hiểm hoặc đòi hỏi độ chính xác cao.</li>
+            <li><strong>Phân tích Dữ liệu & AI:</strong> Khả năng sử dụng các thuật toán, trí tuệ nhân tạo (AI) để phân tích dữ liệu lớn (Big Data) thu thập được, từ đó đưa ra các dự báo, tối ưu hóa quy trình và hỗ trợ ra quyết định.</li>
+            <li><strong>Các công nghệ khác:</strong> Mức độ tìm hiểu và ứng dụng các công nghệ tiên tiến khác như in 3D, thực tế ảo tăng cường (AR/VR), blockchain để tạo ra các sản phẩm và quy trình đột phá.</li>
+        </ul>
+        <p class="mt-4">Việc tiến tới Sản xuất Thông minh giúp doanh nghiệp đạt được hiệu quả vượt trội, tăng tính linh hoạt, giảm chi phí và tạo ra những sản phẩm, dịch vụ có giá trị cao hơn cho thị trường.</p>
+      `,
       indicators: [
           {
               id: "4.1",
@@ -214,4 +261,4 @@ export const checklistData = [
           },
       ]
     }
-  ];  
+  ];

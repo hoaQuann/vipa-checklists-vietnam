@@ -1,18 +1,12 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import Papa from 'papaparse';
-import { checklistData } from '@/data/checklistData';
+// Import hàm tiện ích vừa tạo
+import { generateReportData } from '@/lib/reportUtils';
 
-// Định nghĩa kiểu dữ liệu cho request body
+// Interface cho request body không đổi
 interface ExportRequestBody {
-  results: {
-    companyInfo: { [key: string]: string };
-    scores: Record<string, number>;
-    notes: Record<string, string>;
-    pillarAvgs: number[];
-    totalVipaScore: number;
-    finalRank: string;
-  };
+  results: any; 
   assessmentId: string;
   aiRecommendation: string | null;
 }
@@ -21,48 +15,56 @@ export async function POST(request: Request) {
   try {
     const { results, assessmentId, aiRecommendation }: ExportRequestBody = await request.json();
 
-    const generalInfo = [
-        ["Tên Doanh nghiệp:", results.companyInfo.name],
-        ["Số điện thoại:", results.companyInfo.phoneNumber],
-        ["Địa chỉ:", results.companyInfo.address],
-        ["Người liên hệ:", results.companyInfo.contactPerson],
-        ["Ngày đánh giá:", results.companyInfo.assessmentDate],
-    ];
+    // === TÁI CẤU TRÚC ===
+    // Gọi hàm tiện ích để lấy dữ liệu đã được xử lý
+    const reportData = generateReportData(results);
+    // === KẾT THÚC TÁI CẤU TRÚC ===
 
-    const detailedScores = [["Chỉ số", "Mức độ lựa chọn", "Điểm", "Ghi chú"]];
-    checklistData.forEach(pillar => {
-        detailedScores.push([pillar.pillar]);
-        pillar.indicators.forEach(indicator => {
-            const score = results.scores[indicator.id] || 0;
-            const selectedOption = indicator.options.find(opt => opt.score === score);
-            detailedScores.push([
-                `${indicator.id}. ${indicator.title}`,
-                selectedOption ? selectedOption.text : "Chưa chọn",
-                score.toString(),
-                results.notes[indicator.id] || ""
-            ]);
-        });
-    });
-
-    const summary = [[],["BẢNG TỔNG HỢP KẾT QUẢ"],["Trụ cột", "Điểm Trung bình", "Trọng số (%)", "Điểm theo Trọng số"]];
-    results.pillarAvgs.forEach((avg: number, index: number) => {
-        const pillarName = checklistData[index]?.pillar.replace(/TRỤ CỘT \d+: /i, '') || `Trụ cột ${index + 1}`;
-        summary.push([`${index + 1}. ${pillarName}`, avg.toFixed(2), "25%", (avg * 0.25).toFixed(2)]);
-    });
-    summary.push(["", "", "TỔNG ĐIỂM ViPA", results.totalVipaScore.toFixed(2)]);
-    summary.push(["", "", "KẾT LUẬN", results.finalRank]);
+    // Xây dựng nội dung CSV từ dữ liệu đã có cấu trúc
+    const generalInfoCsv = Object.entries(reportData.generalInfo).map(([key, value]) => [key, value]);
     
-    // Sửa lỗi: Sử dụng const vì không gán lại
-    const finalCsvData: (string | number)[][] = [...generalInfo, [], ...detailedScores, ...summary];
+    const detailedScoresCsv = [["Trụ cột", "Chỉ số", "Mức độ lựa chọn", "Điểm", "Ghi chú"]];
+    let currentPillar = "";
+    reportData.detailedScores.forEach(item => {
+        // Thêm dòng tiêu đề cho trụ cột mới
+        if(item.pillar !== currentPillar) {
+            detailedScoresCsv.push([item.pillar]);
+            currentPillar = item.pillar;
+        }
+        detailedScoresCsv.push([
+            "", // Để trống cột trụ cột cho các dòng chỉ số
+            `${item.indicatorId}. ${item.indicatorTitle}`,
+            item.selectionText,
+            item.score.toString(),
+            item.note
+        ]);
+    });
+
+    const summaryCsv = [[""], ["BẢNG TỔNG HỢP"]];
+    summaryCsv.push(["Trụ cột", "Điểm Trung bình", "Trọng số (%)", "Điểm theo Trọng số"]);
+    reportData.summary.pillarDetails.forEach(detail => {
+        summaryCsv.push([detail.name, detail.avg, detail.weight, detail.weightedScore]);
+    });
+    summaryCsv.push(["", "", "TỔNG ĐIỂM ViPA", reportData.summary.totalVipaScore]);
+    summaryCsv.push(["", "", "KẾT LUẬN", reportData.summary.finalRank]);
+    
+    let finalCsvData: (string | number)[][] = [
+        ...generalInfoCsv,
+        [], // Dòng trống
+        ...detailedScoresCsv,
+        [], // Dòng trống
+        ...summaryCsv
+    ];
 
     if (aiRecommendation) {
         finalCsvData.push([]);
         finalCsvData.push(["LỘ TRÌNH ĐỀ XUẤT TỪ AI"]);
-        finalCsvData.push([aiRecommendation]);
+        finalCsvData.push([aiRecommendation]); 
     }
 
     const csvString = Papa.unparse(finalCsvData);
 
+    // Logic upload lên Supabase không thay đổi
     const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
     const filePath = `reports/${assessmentId}/report-${Date.now()}.csv`;
     const { error: uploadError } = await supabaseAdmin.storage.from('exports').upload(filePath, csvString, { contentType: 'text/csv;charset=utf-8', upsert: false });
@@ -72,10 +74,10 @@ export async function POST(request: Request) {
     if (!publicUrlData) throw new Error("Could not get public URL for CSV");
 
     return NextResponse.json({ url: publicUrlData.publicUrl });
+
   } catch (error) {
-    // Sửa lỗi: Cung cấp kiểu cho error
-    const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
-    console.error("Lỗi API xuất CSV:", errorMessage);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    console.error("Lỗi khi xuất file CSV:", errorMessage);
     return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import Header from "@/components/Header"; // 1. Import component Header
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -16,8 +17,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="vi" suppressHydrationWarning>
-      {/* Thêm suppressHydrationWarning trực tiếp vào thẻ body để xử lý lỗi triệt để */}
-      <body className={inter.className} suppressHydrationWarning>
+      <body className={inter.className}>
+        {/* 2. Thêm Header vào ngay trên cùng của trang */}
+        <Header /> 
+        
+        {/* Nội dung chính của các trang sẽ hiển thị bên dưới */}
         {children}
       </body>
     </html>
