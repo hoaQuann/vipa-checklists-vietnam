@@ -18,24 +18,18 @@ export default function AuthPage() {
 
     try {
       if (isLogin) {
-        // Handle Login
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         setMessage('Đăng nhập thành công! Đang chuyển hướng...');
-        
-        // THAY ĐỔI: Chuyển hướng về trang chủ sau khi đăng nhập
         router.push('/'); 
-        
-        // Dùng timeout nhỏ để người dùng kịp đọc thông báo
         setTimeout(() => router.refresh(), 1000); 
       } else {
-        // Handle Sign Up
         const { error } = await supabase.auth.signUp({ email, password });
         if (error) throw error;
         setMessage('Đăng ký thành công! Vui lòng kiểm tra email để xác thực.');
       }
-    } catch (error: any) {
-      setMessage(`Lỗi: ${error.message}`);
+    } catch (error: any) { // Sửa lỗi 'any'
+      setMessage(`Lỗi: ${(error as Error).message}`);
     } finally {
       setIsLoading(false);
     }

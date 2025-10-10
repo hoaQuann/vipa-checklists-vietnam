@@ -2,10 +2,9 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { saveAs } from 'file-saver';
-import { marked } from 'marked';
-import AIModal from './AIModal'; // Import component AIModal
+import AIModal from './AIModal';
+import { marked } from 'marked'; // Di chuyển import lên đầu
 
-// Interfaces không đổi
 interface ResultsData {
   companyInfo: { [key: string]: string };
   scores: Record<string, number>;
@@ -190,9 +189,9 @@ export default function ResultsPage({ results, onBack }: ResultsPageProps) {
            {saveStatus !== 'success' && <p className="text-center text-sm text-yellow-600 mt-4">Vui lòng đăng nhập để có thể lưu và xuất báo cáo.</p>}
         </div>
       </div>
-      
-      {/* SỬA LỖI: Truyền prop 'isOpen' vào component AIModal */}
-      <AIModal
+
+      {/* Sửa lỗi: Xóa bỏ import 'marked' không cần thiết ở đây, vì đã được xử lý trong AIModal */}
+      <AIModal 
         isOpen={isModalOpen}
         isLoading={isAiLoading}
         recommendation={aiRecommendation}
