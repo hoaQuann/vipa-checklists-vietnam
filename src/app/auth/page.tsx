@@ -22,14 +22,13 @@ export default function AuthPage() {
         if (error) throw error;
         setMessage('Đăng nhập thành công! Đang chuyển hướng...');
         router.push('/'); 
-        setTimeout(() => router.refresh(), 1000); 
       } else {
         const { error } = await supabase.auth.signUp({ email, password });
         if (error) throw error;
         setMessage('Đăng ký thành công! Vui lòng kiểm tra email để xác thực.');
       }
-    } catch (error: any) { // Sửa lỗi 'any'
-      setMessage(`Lỗi: ${(error as Error).message}`);
+    } catch (error) {
+      setMessage(`Lỗi: ${error instanceof Error ? error.message : "Đã xảy ra lỗi không xác định"}`);
     } finally {
       setIsLoading(false);
     }

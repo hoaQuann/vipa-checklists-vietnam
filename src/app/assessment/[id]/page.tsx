@@ -1,115 +1,145 @@
 "use client";
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import type { User } from '@supabase/supabase-js';
 
-interface Assessment {
+interface AssessmentDetails {
   id: string;
   created_at: string;
   company_name: string;
   total_score: number;
   final_rank: string;
+  csv_export_url?: string;
+  word_export_url?: string;
+  detailed_results: {
+    pillarAvgs: number[];
+  };
 }
 
-export default function DashboardPage() {
+export default function AssessmentDetailPage() {
   const router = useRouter();
-  // Sửa lỗi: Xóa biến 'user' không được sử dụng
-  // const [user, setUser] = useState<User | null>(null);
-  const [assessments, setAssessments] = useState<Assessment[]>([]);
+  const params = useParams();
+  const id = params.id as string;
+
+  const [assessment, setAssessment] = useState<AssessmentDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  
+  const weights: { [key: number]: number } = { 0: 0.25, 1: 0.25, 2: 0.25, 3: 0.25 };
+  const pillarNames = ["1. Quản lý Doanh nghiệp", "2. Quản lý Năng suất", "3. Hệ thống hạ tầng cho CĐS", "4. Sản xuất Thông minh"];
 
   useEffect(() => {
-    const fetchSessionAndData = async () => {
+    if (!id) return;
+
+    const fetchAssessment = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      
       if (!session) {
         router.push('/auth');
         return;
       }
-      
-      // setUser(session.user); // Xóa dòng này
 
       try {
-        // Sửa lỗi 'any': Định nghĩa kiểu dữ liệu trả về cho data
-        const { data, error }: { data: Assessment[] | null, error: any } = await supabase
+        const { data, error } = await supabase
           .from('assessments')
-          .select('id, created_at, company_name, total_score, final_rank')
+          .select('*')
+          .eq('id', id)
           .eq('user_id', session.user.id)
-          .order('created_at', { ascending: false });
+          .single();
 
         if (error) throw error;
-        setAssessments(data || []);
-      } catch (e: any) { // Sửa lỗi 'any'
-        setError(e.message);
+        if (!data) throw new Error("Không tìm thấy bài đánh giá.");
+
+        setAssessment(data as AssessmentDetails);
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Đã xảy ra lỗi không xác định");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchSessionAndData();
-  }, [router]);
+    fetchAssessment();
+  }, [id, router]);
 
   if (loading) {
-    return (
-      <main className="flex min-h-screen flex-col items-center justify-center p-24">
-        <p>Đang tải dữ liệu...</p>
-      </main>
-    );
+    return <main className="flex min-h-screen flex-col items-center justify-center"><p>Đang tải chi tiết...</p></main>;
+  }
+
+  if (error) {
+    return <main className="flex min-h-screen flex-col items-center justify-center"><p className="text-red-500">Lỗi: {error}</p></main>;
   }
 
   return (
     <main className="bg-slate-50 p-4 sm:p-8 min-h-screen">
-      <div className="mx-auto max-w-7xl">
-        <h1 className="mb-6 border-b pb-4 text-3xl font-bold text-gray-800">
-          Lịch sử Đánh giá
+      <div className="max-w-4xl w-full mx-auto bg-white p-4 sm:p-6 lg:p-8 rounded-lg shadow-lg my-8">
+        <h1 className="text-2xl font-bold text-gray-800 mb-2 text-center">
+          Chi tiết Đánh giá
         </h1>
+        <p className="text-center text-gray-500 mb-6 border-b pb-4">
+          Doanh nghiệp: <strong>{assessment?.company_name || 'N/A'}</strong> | Ngày: {new Date(assessment?.created_at || '').toLocaleDateString('vi-VN')}
+        </p>
         
-        {error && <p className="text-red-500">Lỗi: {error}</p>}
+        {assessment && (
+          <>
+            <div className="mt-8">
+              <h2 className="text-xl font-semibold text-gray-700 mb-3">BẢNG TỔNG HỢP KẾT QUẢ</h2>
+              <div className="overflow-x-auto">
+                <table className="min-w-full border-collapse border border-gray-300">
+                  <thead className="bg-gray-100 font-semibold">
+                    <tr>
+                      <th className="p-3 border border-gray-300 text-left">Trụ cột</th>
+                      <th className="p-3 border border-gray-300">Điểm Trung bình</th>
+                      <th className="p-3 border border-gray-300">Trọng số (%)</th>
+                      <th className="p-3 border border-gray-300">Điểm theo Trọng số</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {assessment.detailed_results.pillarAvgs.map((avg, index) => {
+                      const weightedScore = avg * weights[index];
+                      return (
+                          <tr key={index}>
+                            <td className="p-3 border border-gray-300">{pillarNames[index]}</td>
+                            <td className="p-3 border border-gray-300 text-center">{avg.toFixed(2)}</td>
+                            <td className="p-3 border border-gray-300 text-center">{weights[index] * 100}%</td>
+                            <td className="p-3 border border-gray-300 text-center">{weightedScore.toFixed(2)}</td>
+                          </tr>
+                      )
+                    })}
+                    <tr className="bg-blue-100 text-lg font-bold">
+                      <td colSpan={3} className="p-3 border border-gray-300 text-right">TỔNG ĐIỂM ViPA</td>
+                      <td className="p-3 border border-gray-300 text-center">{assessment.total_score.toFixed(2)}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div className="mt-8 text-center">
+              <h2 className="text-xl font-semibold text-gray-700 mb-3">KẾT LUẬN MỨC ĐỘ SẴN SÀNG: <span className="text-blue-600 font-bold">{assessment.final_rank}</span></h2>
+            </div>
+            
+            <div className="mt-10 border-t pt-6">
+                <h3 className="text-lg font-semibold text-center mb-4">Tải về Báo cáo</h3>
+                <div className="flex justify-center items-center gap-4">
+                    {assessment.csv_export_url ? (
+                        <a href={assessment.csv_export_url} target="_blank" rel="noopener noreferrer" download className="flex items-center gap-2 bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition">
+                            <span>📥 Tải CSV</span>
+                        </a>
+                    ) : <p className="text-sm text-gray-500">Chưa có file CSV.</p>}
+                    
+                    {assessment.word_export_url ? (
+                        <a href={assessment.word_export_url} target="_blank" rel="noopener noreferrer" download className="flex items-center gap-2 bg-purple-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-purple-700 transition">
+                            <span>📥 Tải Word</span>
+                        </a>
+                    ) : <p className="text-sm text-gray-500">Chưa có file Word.</p>}
+                </div>
+            </div>
 
-        {assessments.length === 0 && !error ? (
-          <div className="text-center text-gray-600">
-            <p>Bạn chưa có bài đánh giá nào.</p>
-            {/* Sửa lỗi: Thay thế <a> bằng <Link> */}
-            <Link href="/" className="mt-4 inline-block rounded bg-blue-600 px-4 py-2 font-bold text-white hover:bg-blue-700">
-              Thực hiện Đánh giá Mới
-            </Link>
-          </div>
-        ) : (
-          <div className="overflow-x-auto rounded-lg bg-white shadow">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Doanh nghiệp</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Ngày Đánh giá</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Điểm ViPA</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Xếp hạng</th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">Hành động</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200 bg-white">
-                {assessments.map((assessment) => (
-                  <tr key={assessment.id} className="hover:bg-gray-50">
-                    <td className="whitespace-nowrap px-6 py-4 font-medium text-gray-900">{assessment.company_name || 'Chưa đặt tên'}</td>
-                    <td className="whitespace-nowrap px-6 py-4 text-gray-500">{new Date(assessment.created_at).toLocaleDateString('vi-VN')}</td>
-                    <td className="whitespace-nowrap px-6 py-4 text-gray-500">{assessment.total_score.toFixed(2)}</td>
-                    <td className="whitespace-nowrap px-6 py-4">
-                      <span className="inline-flex rounded-full bg-blue-100 px-2 text-xs font-semibold leading-5 text-blue-800">
-                        {assessment.final_rank}
-                      </span>
-                    </td>
-                    <td className="whitespace-nowrap px-6 py-4 text-sm font-medium">
-                      <Link href={`/assessment/${assessment.id}`} className="text-blue-600 hover:text-blue-900">
-                        Xem & Tải về
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+            <div className="mt-10 text-center border-t pt-6">
+                <Link href="/dashboard" className="text-blue-600 hover:text-blue-800 font-semibold">
+                    &larr; Quay lại Lịch sử
+                </Link>
+            </div>
+          </>
         )}
       </div>
     </main>

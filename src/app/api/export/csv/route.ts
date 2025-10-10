@@ -14,7 +14,7 @@ interface ResultsData {
 }
 
 interface ExportRequestBody {
-  results: ResultsData; // Sử dụng kiểu dữ liệu đã định nghĩa
+  results: ResultsData;
   assessmentId: string;
   aiRecommendation: string | null;
 }
@@ -50,7 +50,6 @@ export async function POST(request: Request) {
     summaryCsv.push(["", "", "TỔNG ĐIỂM ViPA", reportData.summary.totalVipaScore]);
     summaryCsv.push(["", "", "KẾT LUẬN", reportData.summary.finalRank]);
     
-    // Sửa lỗi: Chuyển 'let' thành 'const'
     const finalCsvData: (string | number)[][] = [
         ...generalInfoCsv,
         [],

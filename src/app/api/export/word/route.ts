@@ -14,7 +14,7 @@ interface ResultsData {
 }
 
 interface ExportRequestBody {
-  results: ResultsData; // Sử dụng kiểu dữ liệu đã định nghĩa
+  results: ResultsData;
   assessmentId: string;
   aiRecommendation: string | null;
 }
@@ -58,8 +58,8 @@ export async function POST(request: Request) {
     htmlContent += `</tbody></table>`;
     
     if (aiRecommendation) {
+      const aiHtml = await marked.parse(aiRecommendation);
       htmlContent += `<h2>PHẦN D: LỘ TRÌNH HÀNH ĐỘNG DO AI ĐỀ XUẤT</h2>`;
-      const aiHtml = marked.parse(aiRecommendation);
       htmlContent += `<div>${aiHtml}</div>`;
     }
     

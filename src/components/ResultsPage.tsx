@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { saveAs } from 'file-saver';
 import AIModal from './AIModal';
-import { marked } from 'marked'; // Di chuyển import lên đầu
 
 interface ResultsData {
   companyInfo: { [key: string]: string };
@@ -49,7 +48,12 @@ export default function ResultsPage({ results, onBack }: ResultsPageProps) {
             phone_number: results.companyInfo.phoneNumber,
             total_score: results.totalVipaScore,
             final_rank: results.finalRank,
-            detailed_results: { scores: results.scores, notes: results.notes, companyInfo: results.companyInfo }
+            detailed_results: { 
+              scores: results.scores, 
+              notes: results.notes, 
+              companyInfo: results.companyInfo,
+              pillarAvgs: results.pillarAvgs
+            }
           }])
           .select('id')
           .single();
@@ -190,7 +194,6 @@ export default function ResultsPage({ results, onBack }: ResultsPageProps) {
         </div>
       </div>
 
-      {/* Sửa lỗi: Xóa bỏ import 'marked' không cần thiết ở đây, vì đã được xử lý trong AIModal */}
       <AIModal 
         isOpen={isModalOpen}
         isLoading={isAiLoading}
